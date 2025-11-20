@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>House Price Predictor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>House Price Predictor</h1>
+      <p>Enter property details to get an estimated price</p>
+    </div>
+
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form action="/predict" method="post" class="form-grid">
+      <div class="form-group">
+        <label>City</label>
+        <select name="City" required>
+          {% for c in cities %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Area / Colony (AreaName)</label>
+        <input type="text" name="AreaName" placeholder="e.g. Sector 62" required>
+      </div>
+
+      <div class="form-group">
+        <label>Area (sqft)</label>
+        <input type="number" name="AreaSqft" step="1" required>
+      </div>
+
+      <div class="form-group">
+        <label>Bedrooms</label>
+        <input type="number" name="Bedrooms" min="1" required>
+      </div>
+
+      <div class="form-group full">
+        <label>Property Type (Buy / Rent)</label>
+        <select name="PropertyType" required>
+          {% for t in types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group full">
+        <button class="button" type="submit">Predict Price</button>
+      </div>
+    </form>
+
+    {% if prediction_text %}
+      <div class="result">
+        <h2>{{ prediction_text }}</h2>
+        <p><strong>Neighborhood Score:</strong> {{ neighborhood_score }} / 100</p>
+
+        {% if suggestions %}
+          <h3>Similar properties</h3>
+          <div class="cards">
+            {% for s in suggestions %}
+              <div class="card">
+                <strong>{{ s.AreaName }}</strong>
+                <small>{{ s.AreaSqft }} sqft • {{ s.Bedrooms }} BHK</small>
+                <div>₹{{ "{:,.0f}".format(s.Price) }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p>No similar properties found in dataset.</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <p class="note">Note: Predictions are based on the dataset you provided; enlarge dataset for better accuracy.</p>
+  </div>
+</body>
+</html>
