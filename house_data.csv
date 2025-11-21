@@ -1,0 +1,63 @@
+City,AreaName,AreaSqft,Bedrooms,PropertyType,Price
+Delhi,Saket,1200,2,Buy,8500000
+Delhi,Saket,850,2,Rent,18000
+Delhi,Dwarka Sector 6,900,2,Rent,16000
+Delhi,Dwarka Sector 12,1500,3,Buy,12500000
+Delhi,Kalkaji,600,1,Buy,3200000
+Delhi,Kalkaji,600,1,Rent,14000
+Delhi,Rohini Sector 9,900,2,Buy,5000000
+Delhi,Rohini Sector 9,900,2,Rent,15000
+
+Noida,Sector 62,1100,2,Buy,5500000
+Noida,Sector 62,1100,2,Rent,17000
+Noida,Sector 76,1350,3,Buy,7200000
+Noida,Sector 76,1350,3,Rent,22000
+Noida,Sector 137,1600,3,Buy,9000000
+Noida,Sector 137,1600,3,Rent,30000
+Noida,Sector 15,900,2,Buy,4800000
+Noida,Sector 15,900,2,Rent,15000
+
+Ghaziabad,Indirapuram,800,2,Buy,3600000
+Ghaziabad,Indirapuram,800,2,Rent,14000
+Ghaziabad,Vaishali Sector 5,1000,2,Buy,4300000
+Ghaziabad,Vaishali Sector 5,1000,2,Rent,16000
+Ghaziabad,Raj Nagar,1250,3,Buy,5200000
+Ghaziabad,Raj Nagar,1250,3,Rent,18000
+Ghaziabad,Crossings Republik,1500,3,Buy,7500000
+Ghaziabad,Crossings Republik,1500,3,Rent,25000
+
+Mumbai,Andheri West,600,1,Buy,8500000
+Mumbai,Andheri West,600,1,Rent,30000
+Mumbai,Bandra East,750,1,Buy,9500000
+Mumbai,Bandra East,750,1,Rent,35000
+Mumbai,Andheri East,900,2,Buy,12500000
+Mumbai,Andheri East,900,2,Rent,42000
+Mumbai,Malad West,1100,2,Buy,16000000
+Mumbai,Malad West,1100,2,Rent,50000
+
+Pune,Hinjewadi,850,2,Buy,4800000
+Pune,Hinjewadi,850,2,Rent,17000
+Pune,Kothrud,950,2,Buy,5200000
+Pune,Kothrud,950,2,Rent,18000
+Pune,Viman Nagar,1100,3,Buy,6500000
+Pune,Viman Nagar,1100,3,Rent,20000
+Pune,Magarpatta,1300,3,Buy,9000000
+Pune,Magarpatta,1300,3,Rent,25000
+
+Bangalore,Whitefield,900,2,Buy,5500000
+Bangalore,Whitefield,900,2,Rent,18000
+Bangalore,Electronic City,1100,2,Buy,6200000
+Bangalore,Electronic City,1100,2,Rent,20000
+Bangalore,Indiranagar,1300,3,Buy,8000000
+Bangalore,Indiranagar,1300,3,Rent,25000
+Bangalore,HSR Layout,1500,3,Buy,11000000
+Bangalore,HSR Layout,1500,3,Rent,32000
+
+Hyderabad,Gachibowli,850,2,Buy,4200000
+Hyderabad,Gachibowli,850,2,Rent,14000
+Hyderabad,Kondapur,1000,2,Buy,4800000
+Hyderabad,Kondapur,1000,2,Rent,16000
+Hyderabad,Madhapur,1200,3,Buy,6000000
+Hyderabad,Madhapur,1200,3,Rent,20000
+Hyderabad,Banjara Hills,1400,3,Buy,8000000
+Hyderabad,Banjara Hills,1400,3,Rent,25000
