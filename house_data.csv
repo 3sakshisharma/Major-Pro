@@ -1,4 +1,4 @@
-City,AreaName,AreaSqft,Bedrooms,PropertyType,Price
+city,areaname,areasqft,bedrooms,propertytype,price
 Delhi,Saket,1200,2,Buy,8500000
 Delhi,Saket,850,2,Rent,18000
 Delhi,Dwarka Sector 6,900,2,Rent,16000

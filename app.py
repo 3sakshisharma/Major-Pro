@@ -1,73 +1,78 @@
-# app.py
-import os
-import joblib
-import pandas as pd
-from flask import Flask, render_template, request
 
-BASE = os.path.dirname(__file__) or "."
-MODEL_PATH = os.path.join(BASE, "house_price_model.pkl")
-DATA_PATH = os.path.join(BASE, "house_data.csv")
+
+from flask import Flask, render_template, request
+import pickle
+import pandas as pd
+
+from utils.neighborhood import get_score
+from utils.suggestions import get_similar
+from utils.facilities import nearby_facilities
+from utils.email_service import send_email
 
 app = Flask(__name__)
 
-if not os.path.exists(MODEL_PATH):
-    raise FileNotFoundError("Model not found. Run train_model.py first to create house_price_model.pkl")
+model, city_enc, area_enc, type_enc = pickle.load(open("model.pkl","rb"))
 
-model = joblib.load(MODEL_PATH)
-df = pd.read_csv(DATA_PATH)
-df.columns = [c.strip() for c in df.columns]
-
-def unique_sorted(col):
-    return sorted(df[col].dropna().unique().tolist())
-
-@app.route("/")
+@app.route('/')
 def home():
-    cities = unique_sorted('City')
-    types = unique_sorted('PropertyType')
-    return render_template("index.html", cities=cities, types=types)
+    return render_template("index.html")
 
-@app.route("/predict", methods=["POST"])
+@app.route('/predict', methods=['POST'])
 def predict():
     try:
-        city = request.form.get("City","").strip()
-        areaname = request.form.get("AreaName","").strip()
-        areasqft = float(request.form.get("AreaSqft","0"))
-        bedrooms = int(request.form.get("Bedrooms","0"))
-        ptype = request.form.get("PropertyType","").strip()
+        city = request.form['city'].strip().lower()
+        area = request.form['area'].strip().lower()
+        sqft = float(request.form['sqft'])
+        bedroom = int(request.form['bedroom'])
+        ptype = request.form['ptype'].strip().lower()
+        email = request.form.get('email')
+
+        city_e = city_enc.transform([city])[0]
+        area_e = area_enc.transform([area])[0]
+        type_e = type_enc.transform([ptype])[0]
+
+        features = pd.DataFrame([[city_e, area_e, sqft, bedroom, type_e]],
+        columns=['city','areaname','areasqft','bedrooms','propertytype'])
+
+        price = int(model.predict(features)[0])
+        price = max(price, 0)
+
+        # 🔥 NEW FEATURES
+        low = int(price * 0.9)
+        high = int(price * 1.1)
+
+        score = get_score(city, area)
+        confidence = score * 10
+
+        suggestions = get_similar(city, area, sqft)
+        facilities = nearby_facilities(area)
+
+        # SAVE HISTORY
+        with open("history.txt", "a") as f:
+            f.write(f"{city}, {area}, {price}\n")
+
+        # EMAIL
+        if email and email.strip() != "":
+            send_email(email, price, city, area)
+
+        return render_template("index.html",
+            price=price,
+            low=low,
+            high=high,
+            score=score,
+            confidence=confidence,
+            suggestions=suggestions,
+            facilities=facilities,
+            city=city,
+            area=area,
+            sqft=sqft,
+            bedroom=bedroom,
+            ptype=ptype,
+            email=email
+        )
+
     except Exception as e:
-        return render_template("index.html", error=f"Invalid input: {e}", cities=unique_sorted('City'), types=unique_sorted('PropertyType'))
-
-    X_input = pd.DataFrame([{
-        'City': city,
-        'AreaName': areaname,
-        'AreaSqft': areasqft,
-        'Bedrooms': bedrooms,
-        'PropertyType': ptype
-    }])
-
-    try:
-        pred = model.predict(X_input)[0]
-    except Exception as e:
-        return render_template("index.html", error=f"Prediction error: {e}", cities=unique_sorted('City'), types=unique_sorted('PropertyType'))
-
-    # Neighborhood score (simple heuristic)
-    neighborhood_score = round(min(100, (areasqft/1500)*50 + bedrooms*12), 2)
-
-    # Suggestions (top 3 similar in same city & type)
-    similar = df[(df['City']==city) & (df['PropertyType']==ptype)].copy()
-    suggestions = []
-    if len(similar) > 0:
-        similar['PriceDiff'] = (similar['Price'] - pred).abs()
-        top = similar.sort_values('PriceDiff').head(3)
-        suggestions = top[['AreaName','AreaSqft','Bedrooms','Price']].to_dict(orient='records')
-
-    pred_text = f"Predicted Price: ₹{pred:,.0f}"
-    return render_template("index.html",
-                           prediction_text=pred_text,
-                           neighborhood_score=neighborhood_score,
-                           suggestions=suggestions,
-                           cities=unique_sorted('City'),
-                           types=unique_sorted('PropertyType'))
+        return render_template("index.html", error="Invalid input or data not found")
 
 if __name__ == "__main__":
     app.run(debug=True)

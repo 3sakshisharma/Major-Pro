@@ -1,79 +1,104 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>House Price Predictor</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<title>Home Sense:Predicting House Price</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
+
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>House Price Predictor</h1>
-      <p>Enter property details to get an estimated price</p>
-    </div>
+<div class="container">
 
-    {% if error %}
-      <div class="error">{{ error }}</div>
-    {% endif %}
+<h2>🏠 Smart House Price Prediction</h2>
 
-    <form action="/predict" method="post" class="form-grid">
-      <div class="form-group">
-        <label>City</label>
-        <select name="City" required>
-          {% for c in cities %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
-        </select>
-      </div>
+<form action="/predict" method="POST">
 
-      <div class="form-group">
-        <label>Area / Colony (AreaName)</label>
-        <input type="text" name="AreaName" placeholder="e.g. Sector 62" required>
-      </div>
+<input list="cities" name="city" value="{{city}}" placeholder="City" required>
+<datalist id="cities">
+<option value="Delhi">
+<option value="Noida">
+<option value="Gurgaon">
+<option value="Ghaziabad">
+</datalist>
 
-      <div class="form-group">
-        <label>Area (sqft)</label>
-        <input type="number" name="AreaSqft" step="1" required>
-      </div>
+<input name="area" value="{{area}}" placeholder="Area" required>
+<input name="sqft" value="{{sqft}}" placeholder="Sqft" required>
+<input name="bedroom" value="{{bedroom}}" placeholder="Bedrooms" required>
 
-      <div class="form-group">
-        <label>Bedrooms</label>
-        <input type="number" name="Bedrooms" min="1" required>
-      </div>
+<select name="ptype">
+<option value="rent">Rent</option>
+<option value="buy">Buy</option>
+</select>
 
-      <div class="form-group full">
-        <label>Property Type (Buy / Rent)</label>
-        <select name="PropertyType" required>
-          {% for t in types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
-        </select>
-      </div>
+<input type="email" name="email" value="{{email}}" placeholder="Email">
 
-      <div class="form-group full">
-        <button class="button" type="submit">Predict Price</button>
-      </div>
-    </form>
+<button type="submit">Predict</button>
+<button type="reset">Reset</button>
 
-    {% if prediction_text %}
-      <div class="result">
-        <h2>{{ prediction_text }}</h2>
-        <p><strong>Neighborhood Score:</strong> {{ neighborhood_score }} / 100</p>
+</form>
 
-        {% if suggestions %}
-          <h3>Similar properties</h3>
-          <div class="cards">
-            {% for s in suggestions %}
-              <div class="card">
-                <strong>{{ s.AreaName }}</strong>
-                <small>{{ s.AreaSqft }} sqft • {{ s.Bedrooms }} BHK</small>
-                <div>₹{{ "{:,.0f}".format(s.Price) }}</div>
-              </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <p>No similar properties found in dataset.</p>
-        {% endif %}
-      </div>
-    {% endif %}
+{% if error %}
+<p style="color:red">{{error}}</p>
+{% endif %}
 
-    <p class="note">Note: Predictions are based on the dataset you provided; enlarge dataset for better accuracy.</p>
-  </div>
+{% if price %}
+<div class="card">
+
+<h3>💰 Price: ₹{{price}}</h3>
+<h3>📊 Range: ₹{{low}} - ₹{{high}}</h3>
+<h3>📍 Score: {{score}} / 10</h3>
+<h3>🔍 Confidence: {{confidence}}%</h3>
+
+<!-- 🔥 GOOGLE MAP -->
+<iframe
+width="100%"
+height="250"
+style="border:0"
+loading="lazy"
+src="https://www.google.com/maps?q={{area}},{{city}}&output=embed">
+</iframe>
+
+<h4>🏢 Facilities:</h4>
+<ul>
+{% for f in facilities %}
+<li>{{f}}</li>
+{% endfor %}
+</ul>
+
+<h4>🏠 Similar Properties:</h4>
+<ul>
+{% for s in suggestions %}
+<li>{{s}}</li>
+{% endfor %}
+</ul>
+
+<canvas id="myChart"></canvas>
+
+</div>
+
+<script>
+const price = {{price}};
+const score = {{score}};
+
+let chartType = 'bar';
+
+new Chart(document.getElementById('myChart'), {
+    type: chartType,
+    data: {
+        labels: ['Price','Score'],
+        datasets: [{
+            label: 'Analysis',
+            data: [price, score]
+        }]
+    }
+});
+</script>
+
+{% endif %}
+
+</div>
 </body>
 </html>

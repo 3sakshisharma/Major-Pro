@@ -1,64 +1,34 @@
-# train_model.py
-import os
+
+
 import pandas as pd
-import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import r2_score, mean_squared_error
-import joblib
+from sklearn.preprocessing import LabelEncoder
+import pickle
 
-BASE = os.path.dirname(__file__) or "."
-DATA_PATH = os.path.join(BASE, "house_data.csv")
-MODEL_PATH = os.path.join(BASE, "house_price_model.pkl")
+data = pd.read_csv("house_data.csv")
 
-print("Loading dataset:", DATA_PATH)
-df = pd.read_csv(DATA_PATH)
-df.columns = [c.strip() for c in df.columns]
+# CLEAN
+for col in ['city','areaname','propertytype']:
+    data[col] = data[col].str.lower().str.strip()
 
-# Required columns
-required = ['City','AreaName','AreaSqft','Bedrooms','PropertyType','Price']
-for c in required:
-    if c not in df.columns:
-        raise Exception(f"Missing column in CSV: {c}")
+# ENCODERS
+city_enc = LabelEncoder()
+area_enc = LabelEncoder()
+type_enc = LabelEncoder()
 
-# Clean & convert
-df = df.dropna(subset=required).reset_index(drop=True)
-df['AreaSqft'] = pd.to_numeric(df['AreaSqft'], errors='coerce')
-df['Bedrooms'] = pd.to_numeric(df['Bedrooms'], errors='coerce')
-df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
-df = df.dropna(subset=['AreaSqft','Bedrooms','Price']).reset_index(drop=True)
+data['city'] = city_enc.fit_transform(data['city'])
+data['areaname'] = area_enc.fit_transform(data['areaname'])
+data['propertytype'] = type_enc.fit_transform(data['propertytype'])
 
-# Features & target
-X = df[['City','AreaName','AreaSqft','Bedrooms','PropertyType']]
-y = df['Price']
+# FEATURES
+X = data[['city','areaname','areasqft','bedrooms','propertytype']]
+y = data['price']
 
-# Preprocessing: one-hot categorical, passthrough numeric
-cat_cols = ['City','AreaName','PropertyType']
-preprocessor = ColumnTransformer(
-    transformers=[
-        ('ohe', OneHotEncoder(handle_unknown='ignore', sparse_output=False), cat_cols)
-    ],
-    remainder='passthrough'
-)
+# MODEL
+model = RandomForestRegressor(n_estimators=100)
+model.fit(X, y)
 
-pipeline = Pipeline([
-    ('pre', preprocessor),
-    ('model', RandomForestRegressor(n_estimators=150, random_state=42, n_jobs=-1))
-])
+# SAVE
+pickle.dump((model, city_enc, area_enc, type_enc), open("model.pkl","wb"))
 
-# Split & train
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15, random_state=42)
-print("Training model... (may take a while)")
-pipeline.fit(X_train, y_train)
-
-# Eval
-preds = pipeline.predict(X_test)
-print("R2 score:", r2_score(y_test, preds))
-print("RMSE   :", np.sqrt(mean_squared_error(y_test, preds)))
-
-# Save model
-joblib.dump(pipeline, MODEL_PATH)
-print("Saved model as:", MODEL_PATH)
+print("Model trained successfully")
